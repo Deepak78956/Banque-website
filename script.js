@@ -38,9 +38,9 @@ btnScrollTo.addEventListener('click', function () {
 });
 
 //nav scroll
-const navigation = document.querySelector('.nav__links');
+const navLinks = document.querySelector('.nav__links');
 
-navigation.addEventListener('click', function (e) {
+navLinks.addEventListener('click', function (e) {
   e.preventDefault();
   if (e.target.classList.contains('nav__link')) {
     document
@@ -80,5 +80,66 @@ const handleHover = function (e) {
   }
 };
 nav.addEventListener('mouseover', handleHover.bind(0.5));
-
 nav.addEventListener('mouseout', handleHover.bind(1));
+
+//Sticky nav
+const header = document.querySelector('header');
+
+const navOptions = {
+  root: null,
+  threshold: 0,
+  rootMargin: '-90px',
+};
+
+const navCallback = function (entry) {
+  if (!entry[0].isIntersecting) nav.classList.add('sticky');
+  else nav.classList.remove('sticky');
+};
+
+const navObserver = new IntersectionObserver(navCallback, navOptions);
+navObserver.observe(header);
+
+//Reveal Sections
+const sections = document.querySelectorAll('.section');
+
+const revealSections = function (entries, observer) {
+  const [entry] = entries;
+  if (!entry.isIntersecting) return;
+  entry.target.classList.remove('section--hidden');
+  observer.unobserve(entry.target);
+};
+
+const sectionObserver = new IntersectionObserver(revealSections, {
+  root: null,
+  threshold: 0.15,
+});
+
+sections.forEach(section => {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden');
+});
+
+//lazy loading images
+const imgTargets = document.querySelectorAll('img[data-src]');
+
+const loading = function (entries, observer) {
+  const [entry] = entries;
+  if (!entry.isIntersecting) return;
+
+  //replacing src eith data-src
+  entry.target.src = entry.target.dataset.src;
+
+  //removing blur filter after image is loaded
+  entry.target.addEventListener('load', function () {
+    entry.target.classList.remove('lazy-img');
+  });
+
+  observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loading, {
+  root: null,
+  threshold: 0,
+});
+
+imgTargets.forEach(img => imgObserver.observe(img));
